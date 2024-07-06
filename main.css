@@ -1,0 +1,39 @@
+*{
+    background-color: lightgrey;
+}
+
+
+.fullbox{
+    width: 98%;
+    margin: auto;
+    margin-bottom: 25px;
+}
+
+#TitleBox{
+    font-size: 32px;
+    text-align: center;
+}
+#InformationBox{
+    font-size: 20px;
+    text-align: center;
+}
+
+.grid-container{
+    width: 100%;
+    float: left;
+    text-align: center;
+}
+.grid-container #itable{
+    width: 20%;
+    margin: 3vh;
+    display: inline-block;
+    vertical-align: top;
+}
+
+th, td {
+    border: 1px solid black;
+}
+
+#databaseResponseTime{
+    margin: 10px;
+}

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDP Front End</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="fullbox" id="TitleBox">Thor Database</div>
+    <div class="fullbox" id="InformationBox">Please use the boxes below to select the table you wold like to search, as well as any details you would like to filter by.</div>
+    
+    <div class="fullbox" id="filtercontrols">
+        <form>
+            <!-- Initial selection for filtering data -->
+            <label for="tablefilter">Choose a table to retrieve data from:</label>
+            <select id="tablefilterbox" name="tablefilter" onchange="tableCheck()">
+                <option selected disabled>Choose a selection:</option>
+                <option id="patientselect" value="Patient">Patient</option>
+                <option id="staffselect" value="Staff">Staff</option>
+            </select>
+            <br></br>
+            <!-- Filter boxes for patient selection -->
+            <label id="sexfilterlabel" for="sexfilter" style="display: none;">Choose a sex to filter the data: </label>
+            <select id="sexfilterbox" name="sexfilter" style="display: none;" onchange="sexCheck()">
+                <option selected disabled>Choose a sex:</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+            <br></br>
+            <label id="allergyfilterlabel" for="allergyfilter" style="display: none;">Choose an allergy to filter the data: </label>
+            <select id="allergyfilterbox" name="allergyfilter" style="display: none;" onchange="allergyCheck()">
+                <option selected disabled>Choose an allergy:</option>
+                <option value="Animals">Animals</option>
+                <option value="Food">Food</option>
+                <option value="Hay Fever">Hay Fever</option>
+            </select>
+            <br></br>
+            <!-- Filter box for staff selection -->
+            <label id="jobnamefilterlabel" for="jobnamefilterbox" style="display: none;">Choose the type of job to filter the data: </label>
+            <select id="jobnamefilterbox" name="jobname filter" style="display: none;" onchange="jobnameCheck()">
+                <option selected disabled>Choose a job:</option>
+                <option value="Receptionist">Receptionist</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Ambulance Team">Ambulance Team</option>
+                <option value=" Facilities">Facilities</option>
+                <option value="Management">Management</option>
+                <option value="Nurse">Nurse</option>
+                <option value="Pharmacy">Pharmacy</option>
+                <option value="Phycological">Phycological</option>
+                <option value="Midwife">Midwife</option>
+                <option value="Support">Support</option>
+            </select>
+            <br></br>
+            <label id="locationtypefilterlabel" for="locationtypefilter" style="display: none;">Choose the appointment location to filter the data: </label>
+            <select id="locationtypefilterbox" name="locationtype filter" style="display: none;" onchange="locationtypeCheck()">
+                <option selected disabled>Choose a location type:</option>
+                <option value="Hospital">Hospital</option>
+                <option value="Clinic">Clinic</option>
+                <option value="Pharmacy">Pharmacy</option>
+            </select>
+            <br></br>
+        </form>
+    </div>
+
+    <div>
+        <button id="getPatients" onclick="searchPatient()" style="display: none;">Get</button>
+        <button id="getStaff" onclick="searchStaff()" style="display: none;">Get</button>
+    </div>
+
+    <div class="responseTime" id="databaseResponseTime">Database Response Time: </div>
+    
+    <div class="grid-container" id=".grid-container"></div>
+    
+    <script>
+        function tableCheck(){
+            tableoutput = document.getElementById("tablefilterbox");
+            var selectedText = tableoutput.options[tableoutput.selectedIndex].text;
+            console.log(selectedText);
+            switch (selectedText){
+                case "Patient":
+                    document.getElementById("jobnamefilterlabel").style.display="none";
+                    document.getElementById("jobnamefilterbox").style.display="none";
+                    document.getElementById("locationtypefilterlabel").style.display="none";
+                    document.getElementById("locationtypefilterbox").style.display="none";
+                    document.getElementById("getStaff").style.display="none";
+
+                    document.getElementById("sexfilterlabel").style.display="block";
+                    document.getElementById("sexfilterbox").style.display="block";
+                    document.getElementById("allergyfilterlabel").style.display="block";
+                    document.getElementById("allergyfilterbox").style.display="block";
+                    document.getElementById("getPatients").style.display="block";
+                    break;
+                case "Staff":
+                    document.getElementById("sexfilterlabel").style.display="none";
+                    document.getElementById("sexfilterbox").style.display="none";
+                    document.getElementById("allergyfilterlabel").style.display="none";
+                    document.getElementById("allergyfilterbox").style.display="none";
+                    document.getElementById("getPatients").style.display="none";
+
+                    document.getElementById("jobnamefilterlabel").style.display="block";
+                    document.getElementById("jobnamefilterbox").style.display="block";
+                    document.getElementById("locationtypefilterlabel").style.display="block";
+                    document.getElementById("locationtypefilterbox").style.display="block";
+                    document.getElementById("getStaff").style.display="block";
+                    break;
+                default:
+                    console.log("w-w-w whats goin on? *queue crazy frog*")
+            }
+        }
+        function sexCheck(){
+            tableoutput = document.getElementById("sexfilterbox");
+            var selectedSex = tableoutput.options[tableoutput.selectedIndex].text;
+            //console.log(selectedSex);
+            return selectedSex;
+        }
+        function allergyCheck(){
+            tableoutput = document.getElementById("allergyfilterbox");
+            var selectedAllergy = tableoutput.options[tableoutput.selectedIndex].text;
+            //console.log(selectedAllergy);
+            return selectedAllergy;
+        }
+        function jobnameCheck(){
+            tableoutput = document.getElementById("jobnamefilterbox");
+            var jobname = tableoutput.options[tableoutput.selectedIndex].text;
+            //console.log(jobname);
+            return jobname;
+        }
+        function locationtypeCheck(){
+            tableoutput = document.getElementById("locationtypefilterbox");
+            var selectedlocationtype = tableoutput.options[tableoutput.selectedIndex].text;
+            //console.log(selectedlocationtype);
+            return selectedlocationtype;
+        }
+
+        async function searchPatient(){
+            var startTime = performance.now();
+            document.getElementById("databaseResponseTime").innerHTML = "Database Response Time: ";
+            document.getElementById(".grid-container").innerHTML="";
+            const type = sexCheck();
+            const type2 = allergyCheck();
+            console.log(type);
+            console.log(type2);
+            const query = `
+            {
+                patients(filter: { Sex: { eq: "`+type+`" }, and: { Allergies: { eq: "`+type2+`" } } }) {
+                    items{
+                        NHSnumber
+                        FirstName
+                        LastName
+                        Sex
+                        DoB
+                        MobileNumber
+                        HomeTelephone
+                        Email
+                        Address
+                        City
+                        Country
+                        Postcode
+                        Allergies
+                        Notes
+                        EmergencyContactName
+                        EmergencyContactNumber
+                        UpcomingAppointmentDate
+                        PracticeName
+                        AssignedMedicineName
+                        AssignedMedicineManufacturer
+                        id
+                    }
+                }
+            }`;
+            const endpoint = "/data-api/graphql";
+            const response = await fetch(endpoint, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify({ query: query }) 
+            });
+            const result = await response.json();
+            //console.table(result.data.patients.items);
+            var endTime = performance.now();
+            var totalResponseTime = endTime - startTime;
+            //console.log(totalResponseTime);
+            document.getElementById("databaseResponseTime").innerHTML += totalResponseTime.toFixed() + " miliseconds.";
+            valueLength = result.data.patients.items.length;
+            valueLength += 1;
+            for (let i = 1; i < valueLength; i++){
+                const gridContainer = document.querySelector('.grid-container');
+                const table = document.createElement('table');
+                gridContainer.append(table);
+        
+                table.classList.add("table" + (i));
+                table.id = 'itable';
+                table.innerHTML = "<tr><th>Field</th><th>Data</th></tr>";
+            }
+            valueLength2 = result.data.patients.items.length;
+            for (let i2 = 0; i2 < valueLength2; i2++){
+                item = result.data.patients.items[i2];
+                console.log(item);
+                var tablecontainer = document.querySelector('.table' + (i2 += 1));
+                nhs = item.NHSnumber;
+                tablecontainer.innerHTML += "<tr><td>NHS Number</td><td>"+nhs+"</td></tr>";
+                fname = item.FirstName;
+                tablecontainer.innerHTML += "<tr><td>First Name</td><td>"+fname+"</td></tr>";
+                lname = item.LastName;
+                tablecontainer.innerHTML += "<tr><td>Last Name</td><td>"+lname+"</td></tr>";
+                sex = item.Sex;
+                tablecontainer.innerHTML += "<tr><td>Sex</td><td>"+sex+"</td></tr>";
+                dob = item.DoB;
+                tablecontainer.innerHTML += "<tr><td>Date of Birth</td><td>"+dob+"</td></tr>";
+                mnumber = item.MobileNumber;
+                tablecontainer.innerHTML += "<tr><td>Mobile Number</td><td>"+mnumber+"</td></tr>";
+                hnumber = item.HomeTelephone;
+                tablecontainer.innerHTML += "<tr><td>Home Telephone</td><td>"+hnumber+"</td></tr>";
+                email = item.Email;
+                tablecontainer.innerHTML += "<tr><td>Email</td><td>"+email+"</td></tr>";
+                address = item.Address;
+                tablecontainer.innerHTML += "<tr><td>Address</td><td>"+address+"</td></tr>";
+                city = item.City;
+                tablecontainer.innerHTML += "<tr><td>City</td><td>"+city+"</td></tr>";
+                country = item.Country;
+                tablecontainer.innerHTML += "<tr><td>Country</td><td>"+country+"</td></tr>";
+                postcode = item.Postcode;
+                tablecontainer.innerHTML += "<tr><td>Postcode</td><td>"+postcode+"</td></tr>";
+                allergies = item.Allergies;
+                tablecontainer.innerHTML += "<tr><td>Allergies</td><td>"+allergies+"</td></tr>";
+                notes = item.Notes;
+                tablecontainer.innerHTML += "<tr><td>Notes</td><td>"+notes+"</td></tr>";
+                emergencycontname = item.EmergencyContactName;
+                tablecontainer.innerHTML += "<tr><td>Emergency Contact Name</td><td>"+emergencycontname+"</td></tr>";
+                emergencycontnumber = item.EmergencyContactNumber;
+                tablecontainer.innerHTML += "<tr><td>Emergency Contact Number</td><td>"+emergencycontnumber+"</td></tr>";
+                upcomingappdate = item.UpcomingAppointmentDate;
+                tablecontainer.innerHTML += "<tr><td>Upcoming Appointment Date</td><td>"+upcomingappdate+"</td></tr>";
+                practicename = item.PracticeName;
+                tablecontainer.innerHTML += "<tr><td>Practice Name</td><td>"+practicename+"</td></tr>";
+                assignedmedicine = item.AssignedMedicineName;
+                tablecontainer.innerHTML += "<tr><td>Assigned Medicine</td><td>"+assignedmedicine+"</td></tr>";
+                assignedmedicinemanufacturer = item.AssignedMedicineManufacturer;
+                tablecontainer.innerHTML += "<tr><td>Medicine Manufacturer</td><td>"+assignedmedicinemanufacturer+"</td></tr>";
+                i2 -=1;
+            }
+        }
+        async function searchStaff(){
+            var startTime = performance.now();
+            document.getElementById("databaseResponseTime").innerHTML = "Database Response Time: ";
+            document.getElementById(".grid-container").innerHTML=""
+            const type = jobnameCheck();
+            const type2 = locationtypeCheck();
+            console.log(type);
+            console.log(type2);
+            const query = `
+            {
+                staff(filter: { JobName: { eq: "`+type+`" }, and: { TypeOfPractice: { eq: "`+type2+`" } } }) {
+                    items{
+                        SID
+                        FirstName
+                        LastName
+                        MobileNumber
+                        HomeTelephone
+                        Email
+                        Address
+                        City
+                        Country
+                        PostCode
+                        EmergencyContactName
+                        EmergencyContactNumber
+                        JobName
+                        JobSalery
+                        JobHours
+                        PracticeName
+                        TypeOfPractice
+                        PracticeAddress
+                        PracticeCity
+                        PracticeCountry
+                        PracticePostcode
+                        PracticeEmail
+                        PracticePhoneNumber
+                        id
+                    }
+                }
+            }`;
+            const endpoint = "/data-api/graphql";
+            const response = await fetch(endpoint, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify({ query: query }) 
+            });
+            const result = await response.json();
+            //console.table(result.data.staff.items);
+            var endTime = performance.now();
+            var totalResponseTime = endTime - startTime;
+            //console.log(totalResponseTime);
+            document.getElementById("databaseResponseTime").innerHTML += totalResponseTime.toFixed() + " miliseconds.";
+            valueLength = result.data.staff.items.length;
+            valueLength += 1;
+            for (let i = 1; i < valueLength; i++){
+                const gridContainer = document.querySelector('.grid-container');
+                const table = document.createElement('table');
+                gridContainer.append(table);
+        
+                table.classList.add("table" + (i));
+                table.id = 'itable';
+                table.innerHTML = "<tr><th>Field</th><th>Data</th></tr>";
+            }
+            valueLength2 = result.data.staff.items.length;
+            for (let i2 = 0; i2 < valueLength2; i2++){
+                item = result.data.staff.items[i2];
+                console.log(item);
+                var tablecontainer = document.querySelector('.table' + (i2 += 1));
+                sid = item.SID;
+                tablecontainer.innerHTML += "<tr><td>Staff ID</td><td>"+sid+"</td></tr>";
+                fname = item.FirstName;
+                tablecontainer.innerHTML += "<tr><td>First Name</td><td>"+fname+"</td></tr>";
+                lname = item.LastName;
+                tablecontainer.innerHTML += "<tr><td>Last Name</td><td>"+lname+"</td></tr>";
+                mnumber = item.MobileNumber;
+                tablecontainer.innerHTML += "<tr><td>Mobile Number</td><td>"+mnumber+"</td></tr>";
+                hnumber = item.HomeTelephone;
+                tablecontainer.innerHTML += "<tr><td>Home Telephone</td><td>"+hnumber+"</td></tr>";
+                email = item.Email;
+                tablecontainer.innerHTML += "<tr><td>Email</td><td>"+email+"</td></tr>";
+                address = item.Address;
+                tablecontainer.innerHTML += "<tr><td>Address</td><td>"+address+"</td></tr>";
+                city = item.City;
+                tablecontainer.innerHTML += "<tr><td>City</td><td>"+city+"</td></tr>";
+                country = item.Country;
+                tablecontainer.innerHTML += "<tr><td>Country</td><td>"+country+"</td></tr>";
+                postcode = item.PostCode;
+                tablecontainer.innerHTML += "<tr><td>Postcode</td><td>"+postcode+"</td></tr>";
+                emergencycontname = item.EmergencyContactName;
+                tablecontainer.innerHTML += "<tr><td>Emergency Contact Name</td><td>"+emergencycontname+"</td></tr>";
+                emergencycontnumber = item.EmergencyContactNumber;
+                tablecontainer.innerHTML += "<tr><td>Emergency Contact Number</td><td>"+emergencycontnumber+"</td></tr>";
+                jobname = item.JobName;
+                tablecontainer.innerHTML += "<tr><td>Job Name</td><td>"+jobname+"</td></tr>";
+                practicename = item.PracticeName;
+                tablecontainer.innerHTML += "<tr><td>Practice Name</td><td>"+practicename+"</td></tr>";
+                typeofpractice = item.TypeOfPractice;
+                tablecontainer.innerHTML += "<tr><td>Type of Practice</td><td>"+typeofpractice+"</td></tr>";
+                practiceaddress = item.PracticeAddress;
+                tablecontainer.innerHTML += "<tr><td>Practice Address</td><td>"+practiceaddress+"</td></tr>";
+                practicecity = item.PracticeCity;
+                tablecontainer.innerHTML += "<tr><td>Practice City</td><td>"+practicecity+"</td></tr>";
+                practicecountry = item.PracticeCountry;
+                tablecontainer.innerHTML += "<tr><td>Practice Country</td><td>"+practicecountry+"</td></tr>";
+                practicepostcode = item.PracticePostcode;
+                tablecontainer.innerHTML += "<tr><td>Practice Postcode</td><td>"+practicepostcode+"</td></tr>";
+                practicepnumber = item.PracticePhoneNumber;
+                tablecontainer.innerHTML += "<tr><td>Practice Phone Number</td><td>"+practicepnumber+"</td></tr>";
+                i2 -=1;
+            }
+        }
+    </script>
+</body>
+</html>
